@@ -149,6 +149,9 @@ def histo_pdf_plotter_log(ax, x_min, x_max, x_step, x_bins, func, npar):
 
 time_prog_start = timer()
 
+lim_3d = 10.
+a. = 5.
+
 # Set up to obtain the accurate conversion factors from internal units to physical units:
 
 G_cgs = 6.67430e-8			# cm^3 g^-1 s^-2
@@ -269,8 +272,96 @@ v_max = 1.1 * v_max
 #######################################################################################################
 #######################################################################################################
 
+fig_LR , ax_LR = plt.subplots(figsize=(5,5))
+factor_tr = t_max / lim_3d
+ax_LR.set_aspect(factor_tr)
+ax_LR.grid(linestyle=':', which='both')
+ax_LR.set_xlim(0, t_max)
+ax_LR.set_ylim(0, lim_3d)
+ax_LR.set_title('Lagrangian radii as functions of time')
+ax_LR.set_xlabel(r'$t\;$[Myr]')
+ax_LR.set_ylabel(r'$r\;$[pc]') # , rotation='horizontal', horizontalalignment='right'
+
+RL = np.zeros((9,NT))
+for k in range(9):
+	for t in range(NT):
+		C = np.copy(X[:,0,t])
+		C = np.sort(C)
+		RL[k,t] = C[int(np.ceil(I/10*(k+1))-1)]
+	ax_LR.plot(T , RL[k,:] , linestyle='' , marker='o' , markersize=1, label='{:d}0'.format(k+1) + r'$\%\; M_{tot}$')
+	
+ax_LR.legend(frameon=False, bbox_to_anchor=(1.01,1), title=r'$\begin{array}{rcl} \;\;N \!\!&\!\! = \!\!&\!\! 10^{5} \\ M_{H} \!\!&\!\! = \!\!&\!\! 10^{5} \, M_{\odot} \\ M_{P} \!\!&\!\! = \!\!&\!\! 3 \cdot 10^{3} \, M_{\odot} \\ \;\;a & = & 2.3 \; \mathrm{pc} \end{array}$'+'\n')
+
+fig_LR.tight_layout()
+
+##################################################################################################
+
+fig_E , ax_E = plt.subplots(figsize=(5,5))
+
+ax_E.grid(linestyle=':')
+ax_E.set_xlim(0, t_max)
+# ax_E.set_ylim(-1e17,5e17)
+# ax_E.set_aspect(t_max / 6e17)
+ax_E.set_title('Total energies as functions of time\n')
+ax_E.set_xlabel(r'$t\;$[Myr]')
+ax_E.set_ylabel(r'$E\;$[erg/g]') # , rotation='horizontal', horizontalalignment='right'
+
+ax_E.plot(T, E_tot, linestyle=':',  color='black', markersize=1, label=r'$E_{tot}$')
+ax_E.plot(T, P_tot, linestyle='-.', color='black', markersize=1, label=r'$E_{pot}$')
+ax_E.plot(T, K_tot, linestyle='--', color='black', markersize=1, label=r'$E_{kin}$')
+ax_E.legend(frameon=False, bbox_to_anchor=(1.01,1))
+fig_E.tight_layout()
+
+##################################################################################################
+
+fig_Phi = plt.figure(figsize=(6,12))
+gs = GridSpec(3, 1, figure=fig_Phi)
+ax_phi = []
+ax_phi.append(fig_Phi.add_subplot(gs[0,0]))
+ax_phi.append(fig_Phi.add_subplot(gs[1,0]))
+ax_phi.append(fig_Phi.add_subplot(gs[2,0]))
+for i in range(3):
+	ax_phi[i].set_xlim(0, t_max)
+	# ax_phi[i].set_ylim(-4e12,0)
+	# ax_phi[i].set_aspect(t_max / 4e12)
+# rrr = np.linspace(0,lim_3d,1000)
+# fff = PHI_plum(rrr,M_tot,2.3) * G_cgs * Msun_cgs / pc_cgs
+
+ttt = int(np.floor(NT/3))
+for i in range(3):
+	ax_phi[i].grid(linestyle=':')
+	ax_phi[i].set_xlim(0, a) # lim_3d
+	ax_phi[i].set_title('\nPotential at $t$ = {:.3f} Myr'.format(T[ttt*i]))
+	ax_phi[i].set_xlabel(r'$r\;$[pc]')
+	ax_phi[i].set_ylabel(r'$\Phi\;$[erg/g]') #, rotation='horizontal', horizontalalignment='right'
+	ax_phi[i].scatter(X[:,0,ttt*i], P[:,ttt*i], color='lightgrey', s=0.5, label=r'$\Phi(r)\,:\;simulation$')
+	# ax_phi[i].plot(rrr, fff, color='black' , markersize=1, label=r'$\Phi(r)\,:\;theory$')
+	ax_phi[i].legend(frameon=True, loc=4)
+fig_Phi.tight_layout()
+
+##################################################################################################
+##################################################################################################
+
+fig_LR.savefig("C1_Results_PNG/Lagrangian_Radii_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
+fig_LR.savefig("C1_Results_EPS/Lagrangian_Radii_{:s}.eps".format(plotfile), bbox_inches='tight')
+
+fig_E.savefig("C1_Results_PNG/Energy_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
+fig_E.savefig("C1_Results_EPS/Energy_{:s}.eps".format(plotfile), bbox_inches='tight')
+
+fig_Phi.savefig("C1_Results_PNG/Potential_t_sample_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
+fig_Phi.savefig("C1_Results_EPS/Potential_t_sample_{:s}.eps".format(plotfile), bbox_inches='tight')
+
+#######################################################################################################
+#######################################################################################################
+
+
+
+
+
 X_cm = np.zeros((4,NT))
 V_cm = np.zeros((4,NT))
 M_cm = np.zeros((NT))
 
 time_prog_CM = timer()
+
+plt.show()
