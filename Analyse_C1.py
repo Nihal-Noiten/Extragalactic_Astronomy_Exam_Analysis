@@ -20,6 +20,7 @@ from	scipy.integrate 		import quad, ode
 # from scipy.special import erf
 
 #######################################################################################################
+#######################################################################################################
 
 # LATEX: ON, MNRAS template
 
@@ -28,6 +29,7 @@ plt.rcParams.update({
     "font.family": "serif",				# or sans-serif
     "font.serif": ["Times New Roman"]})	# or Helvetica
 
+#######################################################################################################
 #######################################################################################################
 
 # FUNCTIONS
@@ -143,3 +145,132 @@ def histo_pdf_plotter_log(ax, x_min, x_max, x_step, x_bins, func, npar):
 		ax.plot(x, f_x - e_x, color='black', lw=0.9)
 
 #######################################################################################################
+#######################################################################################################
+
+time_prog_start = timer()
+
+# Set up to obtain the accurate conversion factors from internal units to physical units:
+
+G_cgs = 6.67430e-8			# cm^3 g^-1 s^-2
+pc_cgs = 3.08567758e18		# cm
+Msun_cgs = 1.98855e33 		# g
+Myr_cgs = 31557600. * 1e6 	# s
+
+# Conversion factors from internal units to the chosen physical units:
+
+G0 = 1.
+R0 = 5.													# pc
+M0 = 1e4												# Msun
+V0 = np.sqrt( G_cgs * (Msun_cgs * M0) / (pc_cgs * R0) )	# cm/s
+T0 = (pc_cgs * R0) / V0									# s
+T0 = T0 / Myr_cgs										# Myr
+V0 = V0 / 1e5 											# km/s
+
+file = open(plotfile, "r")
+firstrow = (file.readline()).strip("\n")
+NL = 1
+for line in file:
+	NL += 1
+file.close()
+
+I = int(firstrow)				# N_particles
+L = 3+4*I						# N_lines for each timestep
+NT = int(NL / L)				# N_timesteps	
+X = np.zeros((I,4,NT))			# Empty array for the positions at each t
+V = np.zeros((I,4,NT))			# Empty array for the velocities at each t
+P = np.zeros((I,NT))			# Empty array for the potentials at each t
+K = np.zeros((I,NT))			# Empty array for the kinetic energies at each t
+E = np.zeros((I,NT))			# Empty array for the energies at each t
+M = np.zeros((I,NT))			# Empty array for the masses at each t (should be const)
+N = np.zeros(NT)				# Empty array for the N_particles at each t (should be const)
+T = np.zeros(NT)				# Empty array for the times t
+
+file = open(plotfile, "r")		# Read data!
+i = 0
+t = 0
+for line in file:
+	a = line.strip("\n")
+	j = i % L
+	if j == 0:
+		N[t] = float(a)
+	elif j == 2:
+		T[t] = float(a) * T0
+	elif j >= 3 and j < (3+I): 
+		m = j-3
+		M[m,t] = float(a) * M0
+	elif j >= (3+I) and j < (3+2*I):
+		m = j - (3+I)
+		b = a.split()
+		for k in range(len(b)):
+			X[m,k+1,t] = float(b[k]) * R0
+	elif j >= (3+2*I) and j < (3+3*I):
+		m = j - (3+2*I)
+		b = a.split()
+		for k in range(len(b)):
+			V[m,k+1,t] = float(b[k]) * V0
+	elif j >= (3+3*I) and j < (3+4*I):
+		m = j - (3+3*I)
+		P[m,t] = float(a) * M0 / R0
+		if (j+1) == (3+4*I):
+			t += 1
+			if t == NT:
+				break
+	i += 1
+file.close()
+
+print("Number of bodies: {:d}".format(I))
+print('Conversion factors to physical units:')
+print('1 r_IU = {:} pc'.format(R0))
+print('1 m_IU = {:} M_sun'.format(M0))
+print('1 v_IU = {:} km/s'.format(V0))
+print('1 t_IU = {:} Myr'.format(T0))
+
+M_tot = 0
+for i in range(I):
+	M_tot += M[i,0]
+
+print('M_tot = {:}'.format(M_tot))
+print('m_i   = {:}'.format(M[37,0]))
+
+time_prog_load = timer()
+print("Data loading time [hh/mm/ss] = {:}".format(datetime.timedelta(seconds = time_prog_load - time_prog_start)))
+
+#######################################################################################################
+#######################################################################################################
+
+# Let us fill the 0-th component (at any t) of each particle's position and velocity with their moduli
+
+P_tot = np.zeros((NT))
+K_tot = np.zeros((NT))
+E_tot = np.zeros((NT))
+
+for t in range(NT):
+	for i in range(I):
+		X[i,0,t] = np.sqrt(X[i,1,t]**2 + X[i,2,t]**2 + X[i,3,t]**2)
+		V[i,0,t] = np.sqrt(V[i,1,t]**2 + V[i,2,t]**2 + V[i,3,t]**2)
+		P[i,t] = P[i,t] * G_cgs * Msun_cgs / pc_cgs
+		K[i,t] = 0.5 * (V[i,0,t])**2 * 1e10
+		E[i,t] = P[i,t] + K[i,t]
+		P_tot[t] += 0.5 * P[i,t]
+		K_tot[t] += K[i,t]
+		E_tot[t] += 0.5 * P[i,t] + K[i,t]
+
+# find some useful limits for the plots
+t_max = np.max(T)
+r_max = 0.
+v_max = 0.
+for i in range(I):
+	for t in range(NT):
+		r_max = np.amax(np.array([ np.amax( X[i,0,t] ) , r_max ]))
+		v_max = np.amax(np.array([ np.amax( V[i,0,t] ) , v_max ]))
+r_max = 1.1 * r_max
+v_max = 1.1 * v_max
+
+#######################################################################################################
+#######################################################################################################
+
+X_cm = np.zeros((4,NT))
+V_cm = np.zeros((4,NT))
+M_cm = np.zeros((NT))
+
+time_prog_CM = timer()
