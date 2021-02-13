@@ -2,7 +2,7 @@ import	os
 import	argparse
 import	datetime
 import	time
-for		time					import sleep
+from	time					import sleep
 import	sys	
 from	sys						import stdout
 import	numpy 					as np
