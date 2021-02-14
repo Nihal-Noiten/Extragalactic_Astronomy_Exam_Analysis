@@ -149,8 +149,10 @@ def histo_pdf_plotter_log(ax, x_min, x_max, x_step, x_bins, func, npar):
 
 time_prog_start = timer()
 
-lim_3d = 10.
-a. = 5.
+print()
+
+plotfile = 'OUT_OCT_Exam_C1_10000.txt'
+# plotfile = sys.argv[1]
 
 # Set up to obtain the accurate conversion factors from internal units to physical units:
 
@@ -169,7 +171,11 @@ T0 = (pc_cgs * R0) / V0									# s
 T0 = T0 / Myr_cgs										# Myr
 V0 = V0 / 1e5 											# km/s
 
+a      = 1. * R0
+lim_3d = 2. * R0
+
 file = open(plotfile, "r")
+print('Extracting data from: {:}'.format(plotfile))
 firstrow = (file.readline()).strip("\n")
 NL = 1
 for line in file:
@@ -221,6 +227,7 @@ for line in file:
 	i += 1
 file.close()
 
+print()
 print("Number of bodies: {:d}".format(I))
 print('Conversion factors to physical units:')
 print('1 r_IU = {:} pc'.format(R0))
@@ -232,10 +239,13 @@ M_tot = 0
 for i in range(I):
 	M_tot += M[i,0]
 
-print('M_tot = {:}'.format(M_tot))
-print('m_i   = {:}'.format(M[37,0]))
+print()
+print('M_tot  = {:.0f} Msun'.format(M_tot))
+print('m_i    = {:.0f}     Msun'.format(M[37,0]))
 
 time_prog_load = timer()
+
+print()
 print("Data loading time [hh/mm/ss] = {:}".format(datetime.timedelta(seconds = time_prog_load - time_prog_start)))
 
 #######################################################################################################
@@ -272,7 +282,7 @@ v_max = 1.1 * v_max
 #######################################################################################################
 #######################################################################################################
 
-fig_LR , ax_LR = plt.subplots(figsize=(5,5))
+fig_LR , ax_LR = plt.subplots(figsize=(6.25,6.25))
 factor_tr = t_max / lim_3d
 ax_LR.set_aspect(factor_tr)
 ax_LR.grid(linestyle=':', which='both')
@@ -290,9 +300,14 @@ for k in range(9):
 		RL[k,t] = C[int(np.ceil(I/10*(k+1))-1)]
 	ax_LR.plot(T , RL[k,:] , linestyle='' , marker='o' , markersize=1, label='{:d}0'.format(k+1) + r'$\%\; M_{tot}$')
 	
-ax_LR.legend(frameon=False, bbox_to_anchor=(1.01,1), title=r'$\begin{array}{rcl} \;\;N \!\!&\!\! = \!\!&\!\! 10^{5} \\ M_{H} \!\!&\!\! = \!\!&\!\! 10^{5} \, M_{\odot} \\ M_{P} \!\!&\!\! = \!\!&\!\! 3 \cdot 10^{3} \, M_{\odot} \\ \;\;a & = & 2.3 \; \mathrm{pc} \end{array}$'+'\n')
+ax_LR.legend(frameon=True, bbox_to_anchor=(1.01,1), title=r'$\begin{array}{rcl} \;\;N \!\!&\!\! = \!\!&\!\! 10^{4} \\ M_{tot} \!\!&\!\! = \!\!&\!\! 10^{4} \, M_{\odot} \\ \;\;a & = & 5 \; \mathrm{pc} \end{array}$'+'\n')
 
 fig_LR.tight_layout()
+
+fig_LR.savefig("C1_Results_PNG/Lagrangian_Radii_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
+fig_LR.savefig("C1_Results_EPS/Lagrangian_Radii_{:s}.eps".format(plotfile), bbox_inches='tight')
+print()
+print('Fig saved: Lagrangian radii, RF 0')
 
 ##################################################################################################
 
@@ -309,58 +324,191 @@ ax_E.set_ylabel(r'$E\;$[erg/g]') # , rotation='horizontal', horizontalalignment=
 ax_E.plot(T, E_tot, linestyle=':',  color='black', markersize=1, label=r'$E_{tot}$')
 ax_E.plot(T, P_tot, linestyle='-.', color='black', markersize=1, label=r'$E_{pot}$')
 ax_E.plot(T, K_tot, linestyle='--', color='black', markersize=1, label=r'$E_{kin}$')
-ax_E.legend(frameon=False, bbox_to_anchor=(1.01,1))
+# ax_E.plot(T, 2*K_tot + P_tot, linestyle=(0, (3, 5, 1, 5, 1, 5)) , color='black' , markersize=1, label=r'$2E_{kin}+E_{pot}$')
+ax_E.legend(frameon=True, bbox_to_anchor=(1.01,1))
 fig_E.tight_layout()
-
-##################################################################################################
-
-fig_Phi = plt.figure(figsize=(6,12))
-gs = GridSpec(3, 1, figure=fig_Phi)
-ax_phi = []
-ax_phi.append(fig_Phi.add_subplot(gs[0,0]))
-ax_phi.append(fig_Phi.add_subplot(gs[1,0]))
-ax_phi.append(fig_Phi.add_subplot(gs[2,0]))
-for i in range(3):
-	ax_phi[i].set_xlim(0, t_max)
-	# ax_phi[i].set_ylim(-4e12,0)
-	# ax_phi[i].set_aspect(t_max / 4e12)
-# rrr = np.linspace(0,lim_3d,1000)
-# fff = PHI_plum(rrr,M_tot,2.3) * G_cgs * Msun_cgs / pc_cgs
-
-ttt = int(np.floor(NT/3))
-for i in range(3):
-	ax_phi[i].grid(linestyle=':')
-	ax_phi[i].set_xlim(0, a) # lim_3d
-	ax_phi[i].set_title('\nPotential at $t$ = {:.3f} Myr'.format(T[ttt*i]))
-	ax_phi[i].set_xlabel(r'$r\;$[pc]')
-	ax_phi[i].set_ylabel(r'$\Phi\;$[erg/g]') #, rotation='horizontal', horizontalalignment='right'
-	ax_phi[i].scatter(X[:,0,ttt*i], P[:,ttt*i], color='lightgrey', s=0.5, label=r'$\Phi(r)\,:\;simulation$')
-	# ax_phi[i].plot(rrr, fff, color='black' , markersize=1, label=r'$\Phi(r)\,:\;theory$')
-	ax_phi[i].legend(frameon=True, loc=4)
-fig_Phi.tight_layout()
-
-##################################################################################################
-##################################################################################################
-
-fig_LR.savefig("C1_Results_PNG/Lagrangian_Radii_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
-fig_LR.savefig("C1_Results_EPS/Lagrangian_Radii_{:s}.eps".format(plotfile), bbox_inches='tight')
 
 fig_E.savefig("C1_Results_PNG/Energy_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
 fig_E.savefig("C1_Results_EPS/Energy_{:s}.eps".format(plotfile), bbox_inches='tight')
+print()
+print('Fig saved: Energy, RF 0')
+print()
+
+##################################################################################################
+
+fig_Phi = plt.figure(figsize=(6.25,6.25))
+fig_Phi.suptitle('Evolution of the potential as a function of radius')
+gs = GridSpec(2, 2, figure=fig_Phi)
+ax_phi = []
+ax_phi.append(fig_Phi.add_subplot(gs[0,0]))
+ax_phi.append(fig_Phi.add_subplot(gs[0,1]))
+ax_phi.append(fig_Phi.add_subplot(gs[1,0]))
+ax_phi.append(fig_Phi.add_subplot(gs[1,1]))
+
+# rrr = np.linspace(0,lim_3d,1000)
+# fff = PHI_plum(rrr,M_tot,2.3) * G_cgs * Msun_cgs / pc_cgs
+
+# ttt = int(np.floor(NT/4))
+tt = [0, int(np.floor(NT/4)), int(np.floor(NT/3)), int(np.floor(NT/2))]
+for i in range(4):
+	ttt = tt[i]
+	ax_phi[i].grid(linestyle=':', which='both')
+	# ax_phi[i].set_xlim(0, a) # lim_3d
+	# ax_phi[i].set_ylim(-4e12,0)
+	# ax_phi[i].set_aspect(t_max / 4e12)
+	ax_phi[i].set_title('\nPotential at $t$ = {:.3f} Myr\n'.format(T[ttt]))
+	ax_phi[i].set_xlabel(r'$r\;$[pc]')
+	ax_phi[i].set_ylabel(r'$\Phi\;$[erg/g]') #, rotation='horizontal', horizontalalignment='right'
+	ax_phi[i].scatter(X[:,0,ttt], P[:,ttt], color='lightgrey', s=0.5, label=r'$\Phi(r)\,:\;simulation$')
+	# ax_phi[i].plot(rrr, fff, color='black' , markersize=1, label=r'$\Phi(r)\,:\;theory$')
+	# ax_phi[i].legend(frameon=True, loc=4)
+
+fig_Phi.tight_layout()
 
 fig_Phi.savefig("C1_Results_PNG/Potential_t_sample_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
 fig_Phi.savefig("C1_Results_EPS/Potential_t_sample_{:s}.eps".format(plotfile), bbox_inches='tight')
+print()
+print('Fig saved: Potential profile, RF 0')
 
-#######################################################################################################
-#######################################################################################################
+##################################################################################################
+##################################################################################################
 
-
-
-
+# Let us redefine the origin as that of the centre of mass at all times (only slightly different from (0,0,0))
 
 X_cm = np.zeros((4,NT))
 V_cm = np.zeros((4,NT))
 M_cm = np.zeros((NT))
+K_cm = np.zeros((NT))
+K_dot = np.zeros((NT))
+
+R70 = np.zeros(NT)
+for t in range(NT):
+	C = np.copy(X[:,0,t])
+	C = np.sort(C)
+	R70[t] = C[int(np.ceil(I/100*70))]
+
+for t in range(NT):
+	for i in range(I-1):
+		if X[i,0,t] < R70[t]:
+			for j in range(3):
+				X_cm[j+1,t] += X[i,j+1,t] * M[i,t]
+				V_cm[j+1,t] += V[i,j+1,t] * M[i,t]
+			M_cm[t] += M[i,t]
+	for j in range(3):
+		X_cm[j+1,t] = X_cm[j+1,t] / M_cm[t]
+		V_cm[j+1,t] = V_cm[j+1,t] / M_cm[t]
+	X_cm[0,t] = np.sqrt(X_cm[1,t]**2 + X_cm[2,t]**2 + X_cm[3,t]**2)
+	V_cm[0,t] = np.sqrt(V_cm[1,t]**2 + V_cm[2,t]**2 + V_cm[3,t]**2)
+	K_cm[t] = 0.5 * (V_cm[0,t])**2 * 1e10
+	K_dot[t] += ( V[i,1,t] * V_cm[1,t] + V[i,2,t] * V_cm[2,t] + V[i,3,t] * V_cm[3,t] ) * 1e10
+
+P_rf = np.zeros((NT))
+K_rf = np.zeros((NT))
+E_rf = np.zeros((NT))
+
+for i in range(I):
+	for j in range(3):
+		X[i,j+1,:] = X[i,j+1,:] - X_cm[j+1,:]
+		V[i,j+1,:] = V[i,j+1,:] - V_cm[j+1,:]
+	X[i,0,:] = np.sqrt(X[i,1,:]**2 + X[i,2,:]**2 + X[i,3,:]**2)
+	V[i,0,:] = np.sqrt(V[i,1,:]**2 + V[i,2,:]**2 + V[i,3,:]**2)
+	K[i,:] = 0.5 * (V[i,0,:])**2 * 1e10
+	E[i,:] = P[i,:] + K[i,:]
+	P_rf[:] += 0.5 * P[i,:]
+	K_rf[:] += K[i,:]
+E_rf[:] = P_rf[:] + K_rf[:]
+
+#######################################################################################################
+#######################################################################################################
+
+fig_LRCM , ax_LRCM = plt.subplots(figsize=(5,5))
+factor_tr = t_max / lim_3d
+ax_LRCM.set_aspect(factor_tr)
+ax_LRCM.grid(linestyle=':', which='both')
+ax_LRCM.set_xlim(0, t_max)
+ax_LRCM.set_ylim(0, lim_3d)
+ax_LRCM.set_title('Lagrangian radii as functions of time - C.M. R.F.')
+ax_LRCM.set_xlabel(r'$t\;$[Myr]')
+ax_LRCM.set_ylabel(r'$r\;$[pc]') # , rotation='horizontal', horizontalalignment='right'
+
+RLCM = np.zeros((9,NT))
+for k in range(9):
+	for t in range(NT):
+		C = np.copy(X[:,0,t])
+		C = np.sort(C)
+		RLCM[k,t] = C[int(np.ceil(I/10*(k+1))-1)]
+	ax_LRCM.plot(T , RLCM[k,:] , linestyle='' , marker='o' , markersize=1, label='{:d}0'.format(k+1) + r'$\%\; M_{tot}$')
+	
+ax_LRCM.legend(frameon=True, bbox_to_anchor=(1.01,1), title=r'$\begin{array}{rcl} \;\;N \!\!&\!\! = \!\!&\!\! 10^{4} \\ M_{tot} \!\!&\!\! = \!\!&\!\! 10^{4} \, M_{\odot} \\ \;\;a & = & 5 \; \mathrm{pc} \end{array}$'+'\n')
+
+fig_LRCM.tight_layout()
+
+fig_LRCM.savefig("C1_Results_PNG/Lagrangian_Radii_CM_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
+fig_LRCM.savefig("C1_Results_EPS/Lagrangian_Radii_CM_{:s}.eps".format(plotfile), bbox_inches='tight')
+print()
+print('Fig saved: Lagrangian radii, RF 0')
+
+##################################################################################################
+
+fig_ECM , ax_ECM = plt.subplots(figsize=(5,5))
+
+ax_ECM.grid(linestyle=':')
+ax_ECM.set_xlim(0, t_max)
+# ax_ECM.set_ylim(-1e17,5e17)
+# ax_ECM.set_aspect(t_max / 6e17)
+ax_ECM.set_title('Total energies as functions of time - C.M. R.F.\n')
+ax_ECM.set_xlabel(r'$t\;$[Myr]')
+ax_ECM.set_ylabel(r'$E\;$[erg/g]') # , rotation='horizontal', horizontalalignment='right'
+
+ax_ECM.plot(T, E_tot, linestyle=':',  color='black', markersize=1, label=r'$E_{tot}$')
+ax_ECM.plot(T, P_tot, linestyle='-.', color='black', markersize=1, label=r'$E_{pot}$')
+ax_ECM.plot(T, K_tot, linestyle='--', color='black', markersize=1, label=r'$E_{kin}$')
+# ax_ECM.plot(T, 2*K_tot + P_tot, linestyle=(0, (3, 5, 1, 5, 1, 5)) , color='black' , markersize=1, label=r'$2E_{kin}+E_{pot}$')
+ax_ECM.legend(frameon=True, bbox_to_anchor=(1.01,1))
+fig_ECM.tight_layout()
+
+fig_ECM.savefig("C1_Results_PNG/Energy_CM_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
+fig_ECM.savefig("C1_Results_EPS/Energy_CM_{:s}.eps".format(plotfile), bbox_inches='tight')
+print()
+print('Fig saved: Energy, RF CM')
+print()
+
+##################################################################################################
+
+fig_PhiCM = plt.figure(figsize=(6.5,6.5))
+fig_PhiCM.suptitle('Evolution of the potential as a function of radius - C.M. R.F.')
+gs = GridSpec(2, 2, figure=fig_Phi)
+ax_phiCM = []
+ax_phiCM.append(fig_PhiCM.add_subplot(gs[0,0]))
+ax_phiCM.append(fig_PhiCM.add_subplot(gs[0,1]))
+ax_phiCM.append(fig_PhiCM.add_subplot(gs[1,0]))
+ax_phiCM.append(fig_PhiCM.add_subplot(gs[1,1]))
+
+# rrr = np.linspace(0,lim_3d,1000)
+# fff = PHI_plum(rrr,M_tot,2.3) * G_cgs * Msun_cgs / pc_cgs
+
+# ttt = int(np.floor(NT/4))
+tt = [0, int(np.floor(NT/4)), int(np.floor(NT/3)), int(np.floor(NT/2))]
+for i in range(4):
+	ttt = tt[i]
+	ax_phiCM[i].grid(linestyle=':', which='both')
+	# ax_phiCM[i].set_xlim(0, a) # lim_3d
+	# ax_phiCM[i].set_ylim(-4e12,0)
+	# ax_phiCM[i].set_aspect(t_max / 4e12)
+	ax_phiCM[i].set_title('\nPotential at $t$ = {:.3f} Myr\n'.format(T[ttt]))
+	ax_phiCM[i].set_xlabel(r'$r\;$[pc]')
+	ax_phiCM[i].set_ylabel(r'$\Phi\;$[erg/g]') #, rotation='horizontal', horizontalalignment='right'
+	ax_phiCM[i].scatter(X[:,0,ttt], P[:,ttt], color='lightgrey', s=0.5, label=r'$\Phi(r)\,:\;simulation$')
+	# ax_phiCM[i].plot(rrr, fff, color='black' , markersize=1, label=r'$\Phi(r)\,:\;theory$')
+	# ax_phiCM[i].legend(frameon=True, loc=4)
+
+fig_PhiCM.tight_layout()
+
+fig_PhiCM.savefig("C1_Results_PNG/Potential_t_sample_CM_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
+fig_PhiCM.savefig("C1_Results_EPS/Potential_t_sample_CM_{:s}.eps".format(plotfile), bbox_inches='tight')
+print()
+print('Fig saved: Potential profile, RF CM')
+
 
 time_prog_CM = timer()
 
