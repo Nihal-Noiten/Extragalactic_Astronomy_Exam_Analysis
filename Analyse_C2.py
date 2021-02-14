@@ -151,7 +151,7 @@ time_prog_start = timer()
 
 print()
 
-plotfile = 'OUT_OCT_Exam_C1_10000.txt'
+plotfile = 'OUT_OCT_Exam_C2 _10000.txt'
 # plotfile = sys.argv[1]
 
 # Set up to obtain the accurate conversion factors from internal units to physical units:
@@ -304,8 +304,8 @@ ax_LR.legend(frameon=True, bbox_to_anchor=(1.01,1), title=r'$\begin{array}{rcl} 
 
 fig_LR.tight_layout()
 
-fig_LR.savefig("C1_Results_PNG/Lagrangian_Radii_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
-fig_LR.savefig("C1_Results_EPS/Lagrangian_Radii_{:s}.eps".format(plotfile), bbox_inches='tight')
+fig_LR.savefig("C2 _Results_PNG/Lagrangian_Radii_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
+fig_LR.savefig("C2 _Results_EPS/Lagrangian_Radii_{:s}.eps".format(plotfile), bbox_inches='tight')
 print()
 print('Fig saved: Lagrangian radii, RF 0')
 
@@ -328,8 +328,8 @@ ax_E.plot(T, K_tot, linestyle='--', color='black', markersize=1, label=r'$E_{kin
 ax_E.legend(frameon=True, bbox_to_anchor=(1.01,1))
 fig_E.tight_layout()
 
-fig_E.savefig("C1_Results_PNG/Energy_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
-fig_E.savefig("C1_Results_EPS/Energy_{:s}.eps".format(plotfile), bbox_inches='tight')
+fig_E.savefig("C2 _Results_PNG/Energy_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
+fig_E.savefig("C2 _Results_EPS/Energy_{:s}.eps".format(plotfile), bbox_inches='tight')
 print()
 print('Fig saved: Energy, RF 0')
 print()
@@ -365,8 +365,8 @@ for i in range(4):
 
 fig_Phi.tight_layout()
 
-fig_Phi.savefig("C1_Results_PNG/Potential_t_sample_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
-fig_Phi.savefig("C1_Results_EPS/Potential_t_sample_{:s}.eps".format(plotfile), bbox_inches='tight')
+fig_Phi.savefig("C2 _Results_PNG/Potential_t_sample_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
+fig_Phi.savefig("C2 _Results_EPS/Potential_t_sample_{:s}.eps".format(plotfile), bbox_inches='tight')
 print()
 print('Fig saved: Potential profile, RF 0')
 
@@ -443,8 +443,8 @@ ax_LRCM.legend(frameon=True, bbox_to_anchor=(1.01,1), title=r'$\begin{array}{rcl
 
 fig_LRCM.tight_layout()
 
-fig_LRCM.savefig("C1_Results_PNG/Lagrangian_Radii_CM_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
-fig_LRCM.savefig("C1_Results_EPS/Lagrangian_Radii_CM_{:s}.eps".format(plotfile), bbox_inches='tight')
+fig_LRCM.savefig("C2 _Results_PNG/Lagrangian_Radii_CM_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
+fig_LRCM.savefig("C2 _Results_EPS/Lagrangian_Radii_CM_{:s}.eps".format(plotfile), bbox_inches='tight')
 print()
 print('Fig saved: Lagrangian radii, RF 0')
 
@@ -467,8 +467,8 @@ ax_ECM.plot(T, K_tot, linestyle='--', color='black', markersize=1, label=r'$E_{k
 ax_ECM.legend(frameon=True, bbox_to_anchor=(1.01,1))
 fig_ECM.tight_layout()
 
-fig_ECM.savefig("C1_Results_PNG/Energy_CM_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
-fig_ECM.savefig("C1_Results_EPS/Energy_CM_{:s}.eps".format(plotfile), bbox_inches='tight')
+fig_ECM.savefig("C2 _Results_PNG/Energy_CM_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
+fig_ECM.savefig("C2 _Results_EPS/Energy_CM_{:s}.eps".format(plotfile), bbox_inches='tight')
 print()
 print('Fig saved: Energy, RF CM')
 print()
@@ -504,8 +504,8 @@ for i in range(4):
 
 fig_PhiCM.tight_layout()
 
-fig_PhiCM.savefig("C1_Results_PNG/Potential_t_sample_CM_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
-fig_PhiCM.savefig("C1_Results_EPS/Potential_t_sample_CM_{:s}.eps".format(plotfile), bbox_inches='tight')
+fig_PhiCM.savefig("C2 _Results_PNG/Potential_t_sample_CM_{:s}.png".format(plotfile), bbox_inches='tight', dpi=400)
+fig_PhiCM.savefig("C2 _Results_EPS/Potential_t_sample_CM_{:s}.eps".format(plotfile), bbox_inches='tight')
 print()
 print('Fig saved: Potential profile, RF CM')
 
@@ -536,7 +536,7 @@ for t in range(len(T)):
 		ax_s.scatter(X[i,1,t] , X[i,2,t] , X[i,3,t] , s=0.05 , color='darkred')
 	for i in range(I):
 		ax_s.scatter(X[i,1,t] , X[i,2,t] , X[i,3,t] , s=0.0025 , color='darkred')
-	snap.savefig("C1_Snaps/snapshot_{:d}.png".format(t), bbox_inches='tight')
+	snap.savefig("C2 _Snaps/snapshot_{:d}.png".format(t), bbox_inches='tight')
 	plt.close(snap)
 	stdout.write("\rSaving movie snapshots:     progress = {:3.2f} %".format(t/len(T)*100.))
 stdout.write("\rSaved all movie snapshots:  progress = {:3.2f} % \n".format(100.))
